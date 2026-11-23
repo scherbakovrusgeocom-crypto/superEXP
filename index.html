@@ -21,6 +21,7 @@
       --amber-soft: rgba(245, 158, 11, 0.15);
       --red: #ef4444;
       --red-soft: rgba(239, 68, 68, 0.15);
+      --purple: #a855f7;
       --radius: 14px;
     }
 
@@ -43,13 +44,13 @@
       top: 0;
       z-index: 20;
       backdrop-filter: blur(14px);
-      background: rgba(11, 15, 23, 0.9);
+      background: rgba(11, 15, 23, 0.92);
       border-bottom: 1px solid var(--border);
       padding: 12px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
     .brand {
@@ -80,18 +81,23 @@
       color: var(--muted);
     }
 
+    .top-actions {
+      display: flex;
+      gap: 6px;
+    }
+
     .icon-btn {
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 10px;
-      padding: 8px 11px;
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .icon-btn.primary {
@@ -156,7 +162,7 @@
     }
 
     .metric-val {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       word-break: break-word;
     }
@@ -344,6 +350,63 @@
       color: #e2e8f0;
     }
 
+    .chart-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chart-row {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+
+    .chart-row-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+
+    .bar-label {
+      width: 68px;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 7px;
+      background: #080c12;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .bar-fill.math { background: var(--amber); }
+    .bar-fill.claude { background: var(--purple); }
+    .bar-fill.final { background: var(--green); }
+
     .arch-item {
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -436,7 +499,7 @@
 
     .loader {
       text-align: center;
-      padding: 32px 16px;
+      padding: 24px 16px;
       color: var(--muted);
       font-size: 13px;
     }
@@ -451,7 +514,10 @@
       </div>
       <div class="brand-sub" id="topSub">Подключение к терминалу...</div>
     </div>
-    <button class="icon-btn primary" id="refreshBtn" onclick="loadState()">↻ Обновить</button>
+    <div class="top-actions">
+      <button class="icon-btn" id="extBtn" onclick="openInExternalBrowser()" title="Открыть в браузере">🌐</button>
+      <button class="icon-btn primary" id="refreshBtn" onclick="loadState()">↻ Обновить</button>
+    </div>
   </header>
 
   <div class="toast" id="toast"></div>
@@ -463,12 +529,12 @@
     <section id="tab-dashboard" class="hidden">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Угадано и состояние тиража</span>
+          <span class="card-title">Сравнение точности и тираж</span>
           <span class="pill ok" id="drawBadge">Тираж</span>
         </div>
         <div class="grid-2">
           <div class="metric">
-            <div class="metric-label">Угадано (сыграно / из 15)</div>
+            <div class="metric-label">Итог / Мат / Claude</div>
             <div class="metric-val" id="mHits">—</div>
           </div>
           <div class="metric">
@@ -490,13 +556,13 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Загрузка тиража текстом (прошлый сохраняется сам)</span>
+          <span class="card-title">Загрузка нового тиража текстом</span>
         </div>
-        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую ставки в таблицу...')">
-          💾 Зафиксировать текущие ставки в таблицу
+        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую тираж без дублей...')">
+          💾 Зафиксировать ставки тиража в архив
         </button>
-        <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер тиража (например: №5077)" />
-        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте скопированный текст тиража с телефона (данные прошлого тиража сохранятся автоматически)"></textarea>
+        <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер тиража (например: №5078)" />
+        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте скопированный текст тиража с телефона (шапки таблицы отфильтруются сами, прошлый тираж сохранится в архив)"></textarea>
         <button class="icon-btn primary" style="width:100%; justify-content:center; margin-top:8px" onclick="importDrawFromTextarea()">
           📋 Загрузить текст тиража (прошлый тираж в архив)
         </button>
@@ -504,22 +570,22 @@
           <button class="d-btn" onclick="triggerAction('step2', {}, 'Запускаю Шаг 2 OSINT...')">🌐 Шаг 2 OSINT</button>
           <button class="d-btn" onclick="triggerAction('step3', {}, 'Запускаю Шаг 3 Claude...')">🤖 Шаг 3 Claude</button>
         </div>
-        <button class="d-btn pack-btn" onclick="triggerAction('scores', {}, 'Обновляю счёт и подсчёт угаданных...')">
-          ⚽ Обновить счёт и подсчёт угаданных
+        <button class="d-btn pack-btn" onclick="triggerAction('scores', {}, 'Обновляю счёт и статистику...')">
+          ⚽ Обновить счёт и сравнение угаданных
         </button>
       </div>
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Двойники и пакет</span>
-          <span class="pill" id="dCurrentBadge">Дв: —</span>
+          <span class="card-title">Страховки (11 / 12 / 13) и купоны от 30 ₽</span>
+          <span class="pill" id="dCurrentBadge">Стр: —</span>
         </div>
         <div class="doubles-row">
-          <button class="d-btn" id="btnD9" onclick="setDoubles(9)">Дв: 9</button>
-          <button class="d-btn" id="btnD10" onclick="setDoubles(10)">Дв: 10</button>
-          <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Дв: 11</button>
+          <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Стр: 11</button>
+          <button class="d-btn" id="btnD12" onclick="setDoubles(12)">Стр: 12</button>
+          <button class="d-btn" id="btnD13" onclick="setDoubles(13)">Стр: 13</button>
         </div>
-        <button class="d-btn pack-btn" onclick="triggerAction('pack44', {}, 'Собираю 44 купона (1320 ₽)...')">
+        <button class="d-btn pack-btn" onclick="triggerAction('pack44', {}, 'Собираю 44 купона × 30 ₽ = 1320 ₽...')">
           💎 Пакет 1320 ₽ (44 купона × 30 ₽)
         </button>
         <div class="info-line" id="packetSummary">Пакет: <strong>—</strong></div>
@@ -533,7 +599,7 @@
     <section id="tab-coupons" class="hidden">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Мой пакет купонов</span>
+          <span class="card-title">Мой пакет купонов (мин. 30 ₽)</span>
           <button class="icon-btn primary" onclick="copyCoupons()">📋 Копировать всё</button>
         </div>
         <div class="info-line" id="couponMeta" style="margin-bottom: 10px;">—</div>
@@ -541,7 +607,7 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 4: МОИ СТАВКИ И АРХИВ -->
+    <!-- ВКЛАДКА 4: АРХИВ И ГРАФИК -->
     <section id="tab-archive" class="hidden"></section>
   </main>
 
@@ -559,8 +625,8 @@
       <span>Купоны</span>
     </button>
     <button class="nav-btn" id="nav-archive" onclick="switchTab('archive')">
-      <span>🗄️</span>
-      <span>Мои ставки</span>
+      <span>📊</span>
+      <span>Архив/График</span>
     </button>
   </nav>
 
@@ -574,9 +640,19 @@
     const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbxXji1xKkI_P6NbMLyQLiW50HvMS3Jje-J9h7AgL9l03uKNBtBVq4aJU_RzBBRqKh1g/exec';
     const params = new URLSearchParams(window.location.search);
     const API_URL = (params.get('api') || DEFAULT_API_URL).trim();
+    const CACHE_KEY = 'SUPEREXP_LAST_STATE_V4';
 
     let currentState = null;
     let isBusy = false;
+
+    function openInExternalBrowser() {
+      const target = window.location.href;
+      if (tg && typeof tg.openLink === 'function') {
+        tg.openLink(target);
+      } else {
+        window.open(target, '_blank');
+      }
+    }
 
     function showToast(msg) {
       const el = document.getElementById('toast');
@@ -596,6 +672,7 @@
     function setButtonsDisabled(disabled) {
       isBusy = disabled;
       document.querySelectorAll('.d-btn, .icon-btn').forEach(b => (b.disabled = disabled));
+      document.getElementById('extBtn').disabled = false;
     }
 
     function loadViaJsonp(url, timeoutMs) {
@@ -621,7 +698,7 @@
 
         script.onerror = function() {
           cleanup();
-          reject(new Error('Ошибка загрузки API (проверьте доступ «Все» в развёртывании)'));
+          reject(new Error('Блокировка API в WebView Telegram (нажмите 🌐 сверху)'));
         };
 
         script.src = `${url}${sep}callback=${encodeURIComponent(cbName)}&_t=${Date.now()}`;
@@ -639,6 +716,15 @@
       }
     }
 
+    function applyStateToUi(data, isCached) {
+      currentState = data;
+      renderAll(data, isCached);
+      document.getElementById('loader').classList.add('hidden');
+      if (!document.querySelector('#tab-dashboard:not(.hidden), #tab-matches:not(.hidden), #tab-coupons:not(.hidden), #tab-archive:not(.hidden)')) {
+        switchTab('dashboard');
+      }
+    }
+
     async function loadState(customUrl) {
       const targetUrl = customUrl || API_URL;
       setButtonsDisabled(true);
@@ -647,15 +733,13 @@
         if (!data || !data.ok) {
           throw new Error((data && data.error) || 'Некорректный ответ API');
         }
-        currentState = data;
-        renderAll(data);
-        document.getElementById('loader').classList.add('hidden');
-        if (!document.querySelector('#tab-dashboard:not(.hidden), #tab-matches:not(.hidden), #tab-coupons:not(.hidden), #tab-archive:not(.hidden)')) {
-          switchTab('dashboard');
-        }
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } catch (e) {}
+        applyStateToUi(data, false);
       } catch (err) {
-        showToast('Ошибка: ' + (err.message || err));
-        document.getElementById('topSub').textContent = 'Ошибка соединения с API';
+        showToast(err.message || 'Ошибка соединения');
+        document.getElementById('topSub').textContent = 'Нет связи с API (нажмите 🌐 для браузера)';
       } finally {
         setButtonsDisabled(false);
       }
@@ -681,14 +765,15 @@
     }
 
     async function setDoubles(count) {
-      await triggerAction('set_doubles', { count }, `Пересчёт на ${count} дв...`);
+      await triggerAction('set_doubles', { count }, `Устанавливаю ${count} страховок...`);
     }
 
-    function renderAll(st) {
-      const ls = st.liveScoreStats || { hits: 0, played: 0, total: 15 };
-      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'} · Угадано: ${ls.hits}/${ls.played}`;
+    function renderAll(st, isCached) {
+      const ls = st.liveScoreStats || { hits: 0, mathHits: 0, claudeHits: 0, played: 0 };
+      const cacheTag = isCached ? ' [кэш]' : '';
+      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'}${cacheTag}`;
       document.getElementById('drawBadge').textContent = st.draw || 'Тираж';
-      document.getElementById('mHits').textContent = `${ls.hits} / ${ls.played} (${ls.hits}/15)`;
+      document.getElementById('mHits').textContent = `${ls.hits} / ${ls.mathHits || 0} / ${ls.claudeHits || 0} (из ${ls.played})`;
       document.getElementById('mDeadline').textContent = st.deadline || '—';
       document.getElementById('mTraffic').textContent = st.trafficLight || '—';
       document.getElementById('mMonte').textContent = st.monteCarlo || '—';
@@ -696,8 +781,8 @@
       document.getElementById('mStep3').textContent = st.step3Status || '—';
 
       const dLim = Number(st.doublesLimit || 0);
-      document.getElementById('dCurrentBadge').textContent = `Дв: ${dLim}`;
-      [9, 10, 11].forEach(n => {
+      document.getElementById('dCurrentBadge').textContent = `Стр: ${dLim}`;
+      [11, 12, 13].forEach(n => {
         const btn = document.getElementById('btnD' + n);
         if (btn) btn.classList.toggle('active', dLim === n);
       });
@@ -720,11 +805,11 @@
       const headerCard = `
         <div class="card">
           <div class="card-head">
-            <span class="card-title">Счёт и подсчёт угаданных</span>
-            <span class="pill ok">Угадано: ${ls.hits}/${ls.played} (из 15)</span>
+            <span class="card-title">Счёт и заход (${ls.played} сыграно)</span>
+            <span class="pill ok">Итог: ${ls.hits} | Мат: ${ls.mathHits || 0} | AI: ${ls.claudeHits || 0}</span>
           </div>
-          <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('scores', {}, 'Обновляю счёт и подсчёт...')">
-            ⚽ Обновить счёт и подсчёт угаданных
+          <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('scores', {}, 'Обновляю счёт и сравнение...')">
+            ⚽ Обновить счёт и сравнение угаданных
           </button>
         </div>
       `;
@@ -752,8 +837,9 @@
             </div>
             <div class="match-meta">
               <span class="chip score">${escapeHtml(scoreText)}</span>
+              ${m.mathPick ? `<span class="chip">Мат: ${escapeHtml(m.mathPick)}</span>` : ''}
               ${m.leagueTime ? `<span class="chip">${escapeHtml(m.leagueTime)}</span>` : ''}
-              ${m.odds ? `<span class="chip">Кэфы: ${escapeHtml(m.odds)}</span>` : ''}
+              ${m.odds ? `<span class="chip">${escapeHtml(m.odds)}</span>` : ''}
               ${shiftHtml}
             </div>
             ${m.claude ? `<div class="match-claude">${escapeHtml(m.claude)}</div>` : ''}
@@ -776,51 +862,53 @@
     function renderArchive(arch) {
       const container = document.getElementById('tab-archive');
       const snaps = (arch && arch.snapshots) ? arch.snapshots : [];
-      const items = (arch && arch.items) ? arch.items : [];
 
-      if (!snaps.length && !items.length) {
-        container.innerHTML = '<div class="card">Зафиксированных ставок и записей архива пока нет.</div>';
+      if (!snaps.length) {
+        container.innerHTML = '<div class="card">Архив тиражей пока пуст.</div>';
         return;
       }
+
+      const chartRows = snaps.slice(0, 10).map(s => {
+        const mPct = Math.round(((s.mathHits || 0) / 15) * 100);
+        const cPct = Math.round(((s.claudeHits || 0) / 15) * 100);
+        const fPct = Math.round(((s.hits || 0) / 15) * 100);
+        return `
+          <div class="chart-row">
+            <div class="chart-row-head">
+              <span>${escapeHtml(s.draw)}</span>
+              <span>Итог: ${s.hits || 0} · Мат: ${s.mathHits || 0} · Claude: ${s.claudeHits || 0}</span>
+            </div>
+            <div class="bar-group">
+              <div class="bar-line"><span class="bar-label">Мои (${s.hits || 0}/15)</span><div class="bar-track"><div class="bar-fill final" style="width:${fPct}%"></div></div></div>
+              <div class="bar-line"><span class="bar-label">Claude (${s.claudeHits || 0}/15)</span><div class="bar-track"><div class="bar-fill claude" style="width:${cPct}%"></div></div></div>
+              <div class="bar-line"><span class="bar-label">Мат (${s.mathHits || 0}/15)</span><div class="bar-track"><div class="bar-fill math" style="width:${mPct}%"></div></div></div>
+            </div>
+          </div>
+        `;
+      }).join('');
 
       const snapHtml = snaps.map(s => {
         const lines = (s.picks || []).map(p => {
           const mark = p.hit === true ? ' ✅' : (p.hit === false ? ' ❌' : '');
-          return `${p.num}. ${p.match} — Ставка: [${p.pick}] | Счёт: ${p.score}${mark}`;
+          return `${p.num}. ${p.match} — Итог:[${p.pick}] | Мат:[${p.mathPick || '—'}] | Счёт:${p.score}${mark}`;
         }).join('\n');
         return `
           <div class="arch-item">
             <div class="arch-head">
-              <span>📌 ${escapeHtml(s.draw)} (${escapeHtml(s.reason || 'Фиксация')})</span>
-              <span>Угадано: ${s.hits}/${s.played || 15}</span>
+              <span>📌 ${escapeHtml(s.draw)}</span>
+              <span>Итог: ${s.hits}/${s.played || 15}</span>
             </div>
             <div class="info-line" style="margin-top:2px">
-              Записано в таблицу: <strong>${escapeHtml(s.savedAt)}</strong> · Купонов: <strong>${s.couponsCount}</strong> · Сумма: <strong>${s.totalRub} ₽</strong>
+              Обновлено: <strong>${escapeHtml(s.savedAt)}</strong> · Купонов: <strong>${s.couponsCount}</strong> · Сумма: <strong>${s.totalRub} ₽</strong>
             </div>
             <div class="arch-picks">${escapeHtml(lines)}</div>
           </div>
         `;
       }).join('');
 
-      const rowsHtml = items.slice(0, 10).map(it => {
-        const profStr = it.profit >= 0 ? `+${it.profit} ₽` : `${it.profit} ₽`;
-        return `
-          <div class="arch-item">
-            <div class="arch-head">
-              <span>${escapeHtml(it.draw)}</span>
-              <span>Угадано: ${it.finalHits}/${it.played || 15}</span>
-            </div>
-            <div class="info-line" style="margin-top:2px">
-              Математика: <strong>${it.mathHits}</strong> · Стратегия: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
-            </div>
-            ${it.notes ? `<div class="info-line">${escapeHtml(it.notes)}</div>` : ''}
-          </div>
-        `;
-      }).join('');
-
       container.innerHTML =
-        `<div class="card"><div class="card-head"><span class="card-title">Мои ставки (лист «📌 Мои_Ставки»)</span></div>${snapHtml || '<div class="info-line">Снапшотов пока нет.</div>'}</div>` +
-        `<div class="card"><div class="card-head"><span class="card-title">Лист «Архив»</span></div>${rowsHtml}</div>`;
+        `<div class="card"><div class="card-head"><span class="card-title">График точности (Мат vs Claude vs Мои)</span></div><div class="chart-box">${chartRows}</div></div>` +
+        `<div class="card"><div class="card-head"><span class="card-title">Уникальные тиражи (1 тираж = 1 запись)</span></div>${snapHtml}</div>`;
     }
 
     async function copyCoupons() {
@@ -850,6 +938,17 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     }
+
+    // Сначала мгновенно показываем последний кэш, затем обновляем с сервера
+    try {
+      const cachedRaw = localStorage.getItem(CACHE_KEY);
+      if (cachedRaw) {
+        const cachedData = JSON.parse(cachedRaw);
+        if (cachedData && cachedData.ok) {
+          applyStateToUi(cachedData, true);
+        }
+      }
+    } catch (e) {}
 
     loadState();
   </script>
