@@ -347,8 +347,8 @@
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 11px;
-      padding: 10px;
-      margin-bottom: 8px;
+      padding: 11px;
+      margin-bottom: 10px;
       font-size: 12px;
     }
 
@@ -357,6 +357,17 @@
       justify-content: space-between;
       font-weight: 700;
       margin-bottom: 4px;
+    }
+
+    .arch-picks {
+      margin-top: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: #cbd5e1;
+      background: #080c12;
+      padding: 8px;
+      border-radius: 8px;
+      white-space: pre-wrap;
     }
 
     .bottom-nav {
@@ -478,11 +489,14 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Тираж, OSINT и Claude (без ПК)</span>
+          <span class="card-title">Фиксация ставок и загрузка тиража</span>
         </div>
+        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую ставки в архиве...')">
+          💾 Зафиксировать текущие ставки в архив
+        </button>
         <div class="draw-row">
           <input type="text" class="draw-inp" id="drawNumInput" placeholder="№ тиража (пусто = свежий)" />
-          <button class="icon-btn primary" onclick="triggerAction('load_draw', { draw: document.getElementById('drawNumInput').value.trim() }, 'Загружаю тираж...')">
+          <button class="icon-btn primary" onclick="triggerAction('load_draw', { draw: document.getElementById('drawNumInput').value.trim() }, 'Сохраняю и загружаю тираж...')">
             📥 Загрузить
           </button>
         </div>
@@ -616,42 +630,13 @@
       });
     }
 
-    function loadViaIframeBridge(url, timeoutMs) {
-      return new Promise((resolve, reject) => {
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        const sep = url.includes('?') ? '&' : '?';
-        const timer = setTimeout(() => {
-          cleanup();
-          reject(new Error('Таймаут соединения'));
-        }, timeoutMs || 25000);
-
-        function cleanup() {
-          clearTimeout(timer);
-          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-        }
-
-        iframe.onload = function() {
-          cleanup();
-          reject(new Error('Соединение с API заблокировано в WebView'));
-        };
-
-        iframe.src = `${url}${sep}_t=${Date.now()}`;
-        document.body.appendChild(iframe);
-      });
-    }
-
     async function requestApi(url) {
       const sep = url.includes('?') ? '&' : '?';
       try {
         const res = await fetch(`${url}${sep}_t=${Date.now()}`, { cache: 'no-store' });
         return await res.json();
       } catch (e1) {
-        try {
-          return await loadViaJsonp(url, 25000);
-        } catch (e2) {
-          return await loadViaIframeBridge(url, 15000);
-        }
+        return await loadViaJsonp(url, 25000);
       }
     }
 
@@ -714,7 +699,7 @@
 
       renderMatches(st.matches || [], ls);
       renderCoupons(st);
-      renderArchive(st.archive || { items: [] });
+      renderArchive(st.archive || { items: [], snapshots: [] });
     }
 
     function renderMatches(matches, ls) {
@@ -781,13 +766,34 @@
 
     function renderArchive(arch) {
       const container = document.getElementById('tab-archive');
-      const items = arch && arch.items ? arch.items : [];
-      if (!items.length) {
+      const snaps = (arch && arch.snapshots) ? arch.snapshots : [];
+      const items = (arch && arch.items) ? arch.items : [];
+
+      if (!snaps.length && !items.length) {
         container.innerHTML = '<div class="card">Архив тиражей пока пуст.</div>';
         return;
       }
-      container.inner = '';
-      container.innerHTML = items.map(it => {
+
+      const snapHtml = snaps.map(s => {
+        const lines = (s.picks || []).map(p => {
+          const mark = p.hit === true ? ' ✅' : (p.hit === false ? ' ❌' : '');
+          return `${p.num}. ${p.match} — Ставка: [${p.pick}] | Счёт: ${p.score}${mark}`;
+        }).join('\n');
+        return `
+          <div class="arch-item">
+            <div class="arch-head">
+              <span>📌 ${escapeHtml(s.draw)} (${escapeHtml(s.reason || 'Снапшот')})</span>
+              <span>Зашло: ${s.hits}/${s.played || 15}</span>
+            </div>
+            <div class="info-line" style="margin-top:2px">
+              Сохранено: <strong>${escapeHtml(s.savedAt)}</strong> · Купонов: <strong>${s.couponsCount}</strong> · Сумма: <strong>${s.totalRub} ₽</strong>
+            </div>
+            <div class="arch-picks">${escapeHtml(lines)}</div>
+          </div>
+        `;
+      }).join('');
+
+      const rowsHtml = items.slice(0, 10).map(it => {
         const profStr = it.profit >= 0 ? `+${it.profit} ₽` : `${it.profit} ₽`;
         return `
           <div class="arch-item">
@@ -796,12 +802,16 @@
               <span>ИТОГ: ${it.finalHits}/${it.played || 15}</span>
             </div>
             <div class="info-line" style="margin-top:2px">
-              Математика: <strong>${it.mathHits}</strong> · Лидер: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
+              Математика: <strong>${it.mathHits}</strong> · Стратегия/Лидер: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
             </div>
             ${it.notes ? `<div class="info-line">${escapeHtml(it.notes)}</div>` : ''}
           </div>
         `;
       }).join('');
+
+      container.innerHTML =
+        `<div class="card"><div class="card-head"><span class="card-title">Сохранённые ставки и купоны</span></div>${snapHtml || '<div class="info-line">Снапшотов пока нет.</div>'}</div>` +
+        `<div class="card"><div class="card-head"><span class="card-title">Журнал листа «Архив»</span></div>${rowsHtml}</div>`;
     }
 
     async function copyCoupons() {
