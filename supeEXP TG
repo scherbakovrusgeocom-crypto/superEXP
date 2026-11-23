@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ТОТО PRO — SuperEXP Terminal</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --surface: #131a26;
+      --surface-2: #192232;
+      --border: rgba(148, 163, 184, 0.14);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.15);
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.15);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0 0 84px 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.42;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(11, 15, 23, 0.88);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title span.tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 6px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .icon-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.97);
+    }
+
+    .icon-btn.primary {
+      background: var(--accent);
+      color: #06101a;
+      border-color: transparent;
+    }
+
+    .container {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .metric {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .metric-val {
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .pill.ok {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .pill.warn {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .doubles-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .d-btn {
+      padding: 10px 8px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .d-btn.active {
+      background: var(--accent);
+      color: #05111b;
+      border-color: var(--accent);
+    }
+
+    .d-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .info-line {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .info-line strong {
+      color: var(--text);
+    }
+
+    .match-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .match-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .match-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pick-badge {
+      flex-shrink: 0;
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .match-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .chip {
+      background: var(--surface-2);
+      border-radius: 7px;
+      padding: 2px 7px;
+    }
+
+    .chip.shift {
+      background: var(--amber-soft);
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    .match-claude {
+      font-size: 12px;
+      color: #cbd5e1;
+      background: var(--surface-2);
+      padding: 8px 10px;
+      border-radius: 9px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .coupon-box {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      line-height: 1.5;
+      background: #080c12;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 11px;
+      max-height: 420px;
+      overflow: auto;
+      white-space: pre;
+      color: #e2e8f0;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      background: rgba(11, 15, 23, 0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 6px 8px env(safe-area-inset-bottom, 6px);
+      gap: 6px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 7px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .nav-btn.active {
+      background: var(--surface-2);
+      color: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 50;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">
+        <span>ТОТО PRO</span>
+        <span class="tag">SuperEXP</span>
+      </div>
+      <div class="brand-sub" id="topSub">Подключение к терминалу...</div>
+    </div>
+    <button class="icon-btn primary" id="refreshBtn" onclick="loadState()">↻ Обновить</button>
+  </header>
+
+  <div class="toast" id="toast"></div>
+
+  <main class="container">
+    <div id="loader" class="loader">Загружаю данные тиража...</div>
+
+    <!-- ВКЛАДКА 1: ПУЛЬТ -->
+    <section id="tab-dashboard" class="hidden">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Состояние тиража</span>
+          <span class="pill ok" id="drawBadge">Тираж</span>
+        </div>
+        <div class="grid-2">
+          <div class="metric">
+            <div class="metric-label">Дедлайн / Стоп</div>
+            <div class="metric-val" id="mDeadline">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Светофор</div>
+            <div class="metric-val" id="mTraffic">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Монте-Карло</div>
+            <div class="metric-val" id="mMonte">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Баланс П / X / 2</div>
+            <div class="metric-val" id="mBalance">—</div>
+          </div>
+        </div>
+        <div class="info-line">🌐 Шаг 2: <strong id="mStep2">—</strong></div>
+        <div class="info-line">🤖 Шаг 3: <strong id="mStep3">—</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Управление двойниками</span>
+          <span class="pill" id="dCurrentBadge">Дв: —</span>
+        </div>
+        <div class="doubles-row">
+          <button class="d-btn" id="btnD9" onclick="setDoubles(9)">Дв: 9</button>
+          <button class="d-btn" id="btnD10" onclick="setDoubles(10)">Дв: 10</button>
+          <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Дв: 11</button>
+        </div>
+        <div class="info-line" id="packetSummary">
+          Пакет: <strong>—</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 2: МАТЧИ 1-15 -->
+    <section id="tab-matches" class="hidden"></section>
+
+    <!-- ВКЛАДКА 3: КУПОНЫ -->
+    <section id="tab-coupons" class="hidden">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Пакет ставок</span>
+          <button class="icon-btn primary" onclick="copyCoupons()">📋 Копировать всё</button>
+        </div>
+        <div class="info-line" id="couponMeta" style="margin-bottom: 10px;">—</div>
+        <div class="coupon-box" id="couponList">Нет данных</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-dashboard" onclick="switchTab('dashboard')">
+      <span>🎛</span>
+      <span>Пульт</span>
+    </button>
+    <button class="nav-btn" id="nav-matches" onclick="switchTab('matches')">
+      <span>📋</span>
+      <span>Матчи (1–15)</span>
+    </button>
+    <button class="nav-btn" id="nav-coupons" onclick="switchTab('coupons')">
+      <span>🎫</span>
+      <span>Купоны</span>
+    </button>
+  </nav>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyeXU8XrB3R5YTDw5DmOn22sMACoM0vOIzUicB2Z0eOquJmh_NSTWC6JLiuPf3xFXta/exec';
+    const params = new URLSearchParams(window.location.search);
+    const API_URL = (params.get('api') || localStorage.getItem('TOTO_PRO_API_URL') || DEFAULT_API_URL).trim();
+    if (params.get('api')) {
+      localStorage.setItem('TOTO_PRO_API_URL', API_URL);
+    }
+
+    let currentState = null;
+    let isBusy = false;
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function switchTab(tabName) {
+      ['dashboard', 'matches', 'coupons'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('hidden', t !== tabName);
+        document.getElementById('nav-' + t).classList.toggle('active', t === tabName);
+      });
+    }
+
+    function setButtonsDisabled(disabled) {
+      isBusy = disabled;
+      document.querySelectorAll('.d-btn').forEach(b => (b.disabled = disabled));
+      document.getElementById('refreshBtn').disabled = disabled;
+    }
+
+    async function loadState(customUrl) {
+      const targetUrl = customUrl || API_URL;
+      setButtonsDisabled(true);
+      try {
+        const res = await fetch(targetUrl, { cache: 'no-store' });
+        const data = await res.json();
+        if (!data || !data.ok) {
+          throw new Error((data && data.error) || 'Некорректный ответ API');
+        }
+        currentState = data;
+        renderAll(data);
+        document.getElementById('loader').classList.add('hidden');
+        if (!document.querySelector('#tab-dashboard:not(.hidden), #tab-matches:not(.hidden), #tab-coupons:not(.hidden)')) {
+          switchTab('dashboard');
+        }
+      } catch (err) {
+        showToast('Ошибка загрузки: ' + (err.message || err));
+        document.getElementById('topSub').textContent = 'Ошибка соединения с API';
+      } finally {
+        setButtonsDisabled(false);
+      }
+    }
+
+    async function setDoubles(count) {
+      if (isBusy) return;
+      showToast(`Пересчёт на ${count} дв...`);
+      const sep = API_URL.includes('?') ? '&' : '?';
+      await loadState(`${API_URL}${sep}action=set_doubles&count=${encodeURIComponent(count)}`);
+      showToast(`Установлено двойников: ${count}`);
+    }
+
+    function renderAll(st) {
+      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'}`;
+      document.getElementById('drawBadge').textContent = st.draw || 'Тираж';
+      document.getElementById('mDeadline').textContent = st.deadline || '—';
+      document.getElementById('mTraffic').textContent = st.trafficLight || '—';
+      document.getElementById('mMonte').textContent = st.monteCarlo || '—';
+      document.getElementById('mBalance').textContent = st.balanceInfo || '—';
+      document.getElementById('mStep2').textContent = st.step2Status || '—';
+      document.getElementById('mStep3').textContent = st.step3Status || '—';
+
+      const dLim = Number(st.doublesLimit || 0);
+      document.getElementById('dCurrentBadge').textContent = `Дв: ${dLim}`;
+      [9, 10, 11].forEach(n => {
+        const btn = document.getElementById('btnD' + n);
+        if (btn) btn.classList.toggle('active', dLim === n);
+      });
+
+      const bs = st.betSummary || {};
+      document.getElementById('packetSummary').innerHTML =
+        `Стратегия: <strong>${bs.strategy || '—'}</strong> · Купонов: <strong>${bs.count || 0}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
+
+      renderMatches(st.matches || []);
+      renderCoupons(st);
+    }
+
+    function renderMatches(matches) {
+      const container = document.getElementById('tab-matches');
+      if (!matches.length) {
+        container.innerHTML = '<div class="card">Матчи пока не загружены.</div>';
+        return;
+      }
+      container.innerHTML = matches.map(m => {
+        const cleanTitle = (m.match || '').replace(/^\d+\.\s*\[[ABC]\]\s*[⚽🏒]\s*/, '');
+        const hasShift = /СДВИГ|ПРОГРУЗ|РОСТ|⚖️/i.test(m.lineMove || '');
+        const shiftHtml = hasShift
+          ? `<span class="chip shift">${escapeHtml((m.lineMove || '').split(' | ')[0])}</span>`
+          : '';
+        const scoreHtml = m.score ? `<span class="chip">Счёт: ${escapeHtml(m.score)}</span>` : '';
+        return `
+          <article class="match-card">
+            <div class="match-top">
+              <div class="match-name">${m.num}. ${escapeHtml(cleanTitle)}</div>
+              <div class="pick-badge">${escapeHtml(m.finalPick || '—')}</div>
+            </div>
+            <div class="match-meta">
+              ${m.leagueTime ? `<span class="chip">${escapeHtml(m.leagueTime)}</span>` : ''}
+              ${m.odds ? `<span class="chip">Кэфы: ${escapeHtml(m.odds)}</span>` : ''}
+              ${scoreHtml}
+              ${shiftHtml}
+            </div>
+            ${m.claude ? `<div class="match-claude">${escapeHtml(m.claude)}</div>` : ''}
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderCoupons(st) {
+      const coupons = st.coupons || [];
+      const bs = st.betSummary || {};
+      document.getElementById('couponMeta').innerHTML =
+        `Тираж: <strong>${escapeHtml(st.draw || '—')}</strong> · Купонов: <strong>${coupons.length}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
+      document.getElementById('couponList').textContent = coupons.length
+        ? coupons.join('\n')
+        : 'На листе «🎫 Ставка_Балтбет» пока нет собранных купонов.';
+    }
+
+    async function copyCoupons() {
+      const text = document.getElementById('couponList').textContent || '';
+      if (!text || text.startsWith('На листе')) {
+        showToast('Нет строк для копирования');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Купоны скопированы ✅');
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Купоны скопированы ✅');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    loadState();
+  </script>
+</body>
+</html>
