@@ -228,14 +228,21 @@
       margin-top: 8px;
     }
 
-    .draw-inp {
-      flex: 1;
+    .draw-inp, .draw-ta {
+      width: 100%;
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 10px;
       padding: 9px 11px;
       font-size: 12.5px;
+      font-family: inherit;
+    }
+
+    .draw-ta {
+      margin-top: 8px;
+      min-height: 110px;
+      resize: vertical;
     }
 
     .info-line {
@@ -489,17 +496,16 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Фиксация ставок и загрузка тиража</span>
+          <span class="card-title">Загрузка тиража текстом (с автосохранением)</span>
         </div>
         <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую ставки в архиве...')">
           💾 Зафиксировать текущие ставки в архив
         </button>
-        <div class="draw-row">
-          <input type="text" class="draw-inp" id="drawNumInput" placeholder="№ тиража (пусто = свежий)" />
-          <button class="icon-btn primary" onclick="triggerAction('load_draw', { draw: document.getElementById('drawNumInput').value.trim() }, 'Сохраняю и загружаю тираж...')">
-            📥 Загрузить
-          </button>
-        </div>
+        <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер/название тиража (например: №5077)" />
+        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте сюда текст тиража с телефона (по матчу на строку, например:&#10;1. Арсенал - Челси 1.85 / 3.50 / 4.20&#10;2. Интер - Милан)"></textarea>
+        <button class="icon-btn primary" style="width:100%; justify-content:center; margin-top:8px" onclick="importDrawFromTextarea()">
+          📋 Загрузить текст тиража (старые ставки в архив)
+        </button>
         <div class="btn-grid-2">
           <button class="d-btn" onclick="triggerAction('step2', {}, 'Запускаю Шаг 2 OSINT...')">🌐 Шаг 2 OSINT</button>
           <button class="d-btn" onclick="triggerAction('step3', {}, 'Запускаю Шаг 3 Claude...')">🤖 Шаг 3 Claude</button>
@@ -669,6 +675,16 @@
       const sep = API_URL.includes('?') ? '&' : '?';
       await loadState(`${API_URL}${sep}${qs.toString()}`);
       showToast('Готово ✅');
+    }
+
+    async function importDrawFromTextarea() {
+      const rawText = document.getElementById('drawTextInput').value || '';
+      const drawTitle = document.getElementById('drawTitleInput').value || '';
+      if (!rawText.trim()) {
+        showToast('Вставьте текст тиража перед загрузкой');
+        return;
+      }
+      await triggerAction('import_text', { text: rawText.trim(), draw: drawTitle.trim() }, 'Сохраняю старые ставки и загружаю тираж...');
     }
 
     async function setDoubles(count) {
