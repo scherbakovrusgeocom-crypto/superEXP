@@ -43,7 +43,7 @@
       top: 0;
       z-index: 20;
       backdrop-filter: blur(14px);
-      background: rgba(11, 15, 23, 0.88);
+      background: rgba(11, 15, 23, 0.9);
       border-bottom: 1px solid var(--border);
       padding: 12px 14px;
       display: flex;
@@ -61,7 +61,6 @@
     .brand-title {
       font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.3px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -74,7 +73,6 @@
       background: var(--accent-soft);
       padding: 2px 6px;
       border-radius: 6px;
-      text-transform: uppercase;
     }
 
     .brand-sub {
@@ -94,17 +92,17 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      transition: transform 0.12s ease, background 0.15s ease;
-    }
-
-    .icon-btn:active {
-      transform: scale(0.97);
     }
 
     .icon-btn.primary {
       background: var(--accent);
       color: #06101a;
       border-color: transparent;
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .container {
@@ -119,6 +117,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 13px;
+      margin-bottom: 10px;
     }
 
     .card-head {
@@ -179,6 +178,13 @@
       color: var(--green);
     }
 
+    .btn-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     .doubles-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -192,10 +198,9 @@
       border: 1px solid var(--border);
       background: var(--surface-2);
       color: var(--text);
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s ease;
     }
 
     .d-btn.active {
@@ -215,6 +220,22 @@
     .d-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    .draw-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .draw-inp {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 12.5px;
     }
 
     .info-line {
@@ -248,18 +269,29 @@
     .match-name {
       font-size: 13.5px;
       font-weight: 700;
-      color: var(--text);
     }
 
     .pick-badge {
       flex-shrink: 0;
-      background: var(--green-soft);
-      color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 8px;
       padding: 3px 8px;
       font-size: 12px;
       font-weight: 800;
+    }
+
+    .pick-badge.hit {
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .pick-badge.miss {
+      background: var(--red-soft);
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.35);
     }
 
     .match-meta {
@@ -311,19 +343,35 @@
       color: #e2e8f0;
     }
 
+    .arch-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .arch-head {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       z-index: 30;
-      background: rgba(11, 15, 23, 0.94);
+      background: rgba(11, 15, 23, 0.95);
       backdrop-filter: blur(14px);
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      padding: 6px 8px env(safe-area-inset-bottom, 6px);
-      gap: 6px;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 6px env(safe-area-inset-bottom, 6px);
+      gap: 4px;
     }
 
     .nav-btn {
@@ -331,8 +379,8 @@
       border: none;
       color: var(--muted);
       border-radius: 10px;
-      padding: 7px 4px;
-      font-size: 11px;
+      padding: 7px 2px;
+      font-size: 10.5px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
@@ -376,7 +424,7 @@
 
     .loader {
       text-align: center;
-      padding: 36px 16px;
+      padding: 32px 16px;
       color: var(--muted);
       font-size: 13px;
     }
@@ -403,10 +451,14 @@
     <section id="tab-dashboard" class="hidden">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Состояние тиража</span>
+          <span class="card-title">Состояние и заход прогнозов</span>
           <span class="pill ok" id="drawBadge">Тираж</span>
         </div>
         <div class="grid-2">
+          <div class="metric">
+            <div class="metric-label">Зашло (сыграно / из 15)</div>
+            <div class="metric-val" id="mHits">—</div>
+          </div>
           <div class="metric">
             <div class="metric-label">Дедлайн / Стоп</div>
             <div class="metric-val" id="mDeadline">—</div>
@@ -419,10 +471,6 @@
             <div class="metric-label">Монте-Карло</div>
             <div class="metric-val" id="mMonte">—</div>
           </div>
-          <div class="metric">
-            <div class="metric-label">Баланс П / X / 2</div>
-            <div class="metric-val" id="mBalance">—</div>
-          </div>
         </div>
         <div class="info-line">🌐 Шаг 2: <strong id="mStep2">—</strong></div>
         <div class="info-line">🤖 Шаг 3: <strong id="mStep3">—</strong></div>
@@ -430,7 +478,26 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Управление двойниками и пакетом</span>
+          <span class="card-title">Тираж, OSINT и Claude (без ПК)</span>
+        </div>
+        <div class="draw-row">
+          <input type="text" class="draw-inp" id="drawNumInput" placeholder="№ тиража (пусто = свежий)" />
+          <button class="icon-btn primary" onclick="triggerAction('load_draw', { draw: document.getElementById('drawNumInput').value.trim() }, 'Загружаю тираж...')">
+            📥 Загрузить
+          </button>
+        </div>
+        <div class="btn-grid-2">
+          <button class="d-btn" onclick="triggerAction('step2', {}, 'Запускаю Шаг 2 OSINT...')">🌐 Шаг 2 OSINT</button>
+          <button class="d-btn" onclick="triggerAction('step3', {}, 'Запускаю Шаг 3 Claude...')">🤖 Шаг 3 Claude</button>
+        </div>
+        <button class="d-btn pack-btn" onclick="triggerAction('scores', {}, 'Обновляю онлайн-счёт...')">
+          ⚽ Обновить онлайн-счёт и заход
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Двойники и пакет</span>
           <span class="pill" id="dCurrentBadge">Дв: —</span>
         </div>
         <div class="doubles-row">
@@ -438,29 +505,30 @@
           <button class="d-btn" id="btnD10" onclick="setDoubles(10)">Дв: 10</button>
           <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Дв: 11</button>
         </div>
-        <button class="d-btn pack-btn" id="btnPack44" onclick="buildPack44()">
+        <button class="d-btn pack-btn" onclick="triggerAction('pack44', {}, 'Собираю 44 купона (1320 ₽)...')">
           💎 Пакет 1320 ₽ (44 купона × 30 ₽)
         </button>
-        <div class="info-line" id="packetSummary">
-          Пакет: <strong>—</strong>
-        </div>
+        <div class="info-line" id="packetSummary">Пакет: <strong>—</strong></div>
       </div>
     </section>
 
-    <!-- ВКЛАДКА 2: МАТЧИ 1-15 -->
+    <!-- ВКЛАДКА 2: МАТЧИ И СЧЁТ -->
     <section id="tab-matches" class="hidden"></section>
 
     <!-- ВКЛАДКА 3: КУПОНЫ -->
     <section id="tab-coupons" class="hidden">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Пакет ставок</span>
+          <span class="card-title">Мой пакет купонов</span>
           <button class="icon-btn primary" onclick="copyCoupons()">📋 Копировать всё</button>
         </div>
         <div class="info-line" id="couponMeta" style="margin-bottom: 10px;">—</div>
         <div class="coupon-box" id="couponList">Нет данных</div>
       </div>
     </section>
+
+    <!-- ВКЛАДКА 4: АРХИВ -->
+    <section id="tab-archive" class="hidden"></section>
   </main>
 
   <nav class="bottom-nav">
@@ -469,12 +537,16 @@
       <span>Пульт</span>
     </button>
     <button class="nav-btn" id="nav-matches" onclick="switchTab('matches')">
-      <span>📋</span>
-      <span>Матчи и Счёт</span>
+      <span>⚽</span>
+      <span>Матчи/Счёт</span>
     </button>
     <button class="nav-btn" id="nav-coupons" onclick="switchTab('coupons')">
       <span>🎫</span>
       <span>Купоны</span>
+    </button>
+    <button class="nav-btn" id="nav-archive" onclick="switchTab('archive')">
+      <span>🗄️</span>
+      <span>Архив</span>
     </button>
   </nav>
 
@@ -498,11 +570,11 @@
       el.textContent = msg;
       el.classList.add('show');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+      window._toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
     }
 
     function switchTab(tabName) {
-      ['dashboard', 'matches', 'coupons'].forEach(t => {
+      ['dashboard', 'matches', 'coupons', 'archive'].forEach(t => {
         document.getElementById('tab-' + t).classList.toggle('hidden', t !== tabName);
         document.getElementById('nav-' + t).classList.toggle('active', t === tabName);
       });
@@ -510,19 +582,18 @@
 
     function setButtonsDisabled(disabled) {
       isBusy = disabled;
-      document.querySelectorAll('.d-btn').forEach(b => (b.disabled = disabled));
-      document.getElementById('refreshBtn').disabled = disabled;
+      document.querySelectorAll('.d-btn, .icon-btn').forEach(b => (b.disabled = disabled));
     }
 
-    function loadStateViaJsonp(targetUrl, timeoutMs) {
+    function loadViaJsonp(url, timeoutMs) {
       return new Promise((resolve, reject) => {
         const cbName = '__totoProCb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
         const script = document.createElement('script');
-        const sep = targetUrl.includes('?') ? '&' : '?';
+        const sep = url.includes('?') ? '&' : '?';
         const timer = setTimeout(() => {
           cleanup();
           reject(new Error('Таймаут JSONP'));
-        }, timeoutMs || 12000);
+        }, timeoutMs || 25000);
 
         function cleanup() {
           clearTimeout(timer);
@@ -540,30 +611,62 @@
           reject(new Error('Ошибка загрузки скрипта API'));
         };
 
-        script.src = `${targetUrl}${sep}callback=${encodeURIComponent(cbName)}&_t=${Date.now()}`;
+        script.src = `${url}${sep}callback=${encodeURIComponent(cbName)}&_t=${Date.now()}`;
         document.body.appendChild(script);
       });
+    }
+
+    function loadViaIframeBridge(url, timeoutMs) {
+      return new Promise((resolve, reject) => {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        const sep = url.includes('?') ? '&' : '?';
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error('Таймаут соединения'));
+        }, timeoutMs || 25000);
+
+        function cleanup() {
+          clearTimeout(timer);
+          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }
+
+        iframe.onload = function() {
+          cleanup();
+          reject(new Error('Соединение с API заблокировано в WebView'));
+        };
+
+        iframe.src = `${url}${sep}_t=${Date.now()}`;
+        document.body.appendChild(iframe);
+      });
+    }
+
+    async function requestApi(url) {
+      const sep = url.includes('?') ? '&' : '?';
+      try {
+        const res = await fetch(`${url}${sep}_t=${Date.now()}`, { cache: 'no-store' });
+        return await res.json();
+      } catch (e1) {
+        try {
+          return await loadViaJsonp(url, 25000);
+        } catch (e2) {
+          return await loadViaIframeBridge(url, 15000);
+        }
+      }
     }
 
     async function loadState(customUrl) {
       const targetUrl = customUrl || API_URL;
       setButtonsDisabled(true);
       try {
-        let data = null;
-        try {
-          const sep = targetUrl.includes('?') ? '&' : '?';
-          const res = await fetch(`${targetUrl}${sep}_t=${Date.now()}`, { cache: 'no-store' });
-          data = await res.json();
-        } catch (fetchErr) {
-          data = await loadStateViaJsonp(targetUrl, 12000);
-        }
+        const data = await requestApi(targetUrl);
         if (!data || !data.ok) {
           throw new Error((data && data.error) || 'Некорректный ответ API');
         }
         currentState = data;
         renderAll(data);
         document.getElementById('loader').classList.add('hidden');
-        if (!document.querySelector('#tab-dashboard:not(.hidden), #tab-matches:not(.hidden), #tab-coupons:not(.hidden)')) {
+        if (!document.querySelector('#tab-dashboard:not(.hidden), #tab-matches:not(.hidden), #tab-coupons:not(.hidden), #tab-archive:not(.hidden)')) {
           switchTab('dashboard');
         }
       } catch (err) {
@@ -574,29 +677,27 @@
       }
     }
 
-    async function setDoubles(count) {
+    async function triggerAction(action, extraParams, busyText) {
       if (isBusy) return;
-      showToast(`Пересчёт на ${count} дв...`);
+      showToast(busyText || 'Выполняю...');
+      const qs = new URLSearchParams(Object.assign({ action }, extraParams || {}));
       const sep = API_URL.includes('?') ? '&' : '?';
-      await loadState(`${API_URL}${sep}action=set_doubles&count=${encodeURIComponent(count)}`);
-      showToast(`Установлено двойников: ${count}`);
+      await loadState(`${API_URL}${sep}${qs.toString()}`);
+      showToast('Готово ✅');
     }
 
-    async function buildPack44() {
-      if (isBusy) return;
-      showToast('Формирую пакет 1320 ₽ (44 куп.)...');
-      const sep = API_URL.includes('?') ? '&' : '?';
-      await loadState(`${API_URL}${sep}action=pack44`);
-      showToast('Готово: 44 купона = 1320 ₽');
+    async function setDoubles(count) {
+      await triggerAction('set_doubles', { count }, `Пересчёт на ${count} дв...`);
     }
 
     function renderAll(st) {
-      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'}`;
+      const ls = st.liveScoreStats || { hits: 0, played: 0, total: 15 };
+      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'} · Зашло: ${ls.hits}/${ls.played}`;
       document.getElementById('drawBadge').textContent = st.draw || 'Тираж';
+      document.getElementById('mHits').textContent = `${ls.hits} / ${ls.played} (${ls.hits}/15)`;
       document.getElementById('mDeadline').textContent = st.deadline || '—';
       document.getElementById('mTraffic').textContent = st.trafficLight || '—';
       document.getElementById('mMonte').textContent = st.monteCarlo || '—';
-      document.getElementById('mBalance').textContent = st.balanceInfo || '—';
       document.getElementById('mStep2').textContent = st.step2Status || '—';
       document.getElementById('mStep3').textContent = st.step3Status || '—';
 
@@ -611,28 +712,49 @@
       document.getElementById('packetSummary').innerHTML =
         `Стратегия: <strong>${escapeHtml(bs.strategy || '—')}</strong> · Купонов: <strong>${bs.count || 0}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
 
-      renderMatches(st.matches || []);
+      renderMatches(st.matches || [], ls);
       renderCoupons(st);
+      renderArchive(st.archive || { items: [] });
     }
 
-    function renderMatches(matches) {
+    function renderMatches(matches, ls) {
       const container = document.getElementById('tab-matches');
       if (!matches.length) {
         container.innerHTML = '<div class="card">Матчи пока не загружены.</div>';
         return;
       }
-      container.innerHTML = matches.map(m => {
+      const headerCard = `
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Онлайн-счёт и заход</span>
+            <span class="pill ok">Зашло: ${ls.hits}/${ls.played} (из 15)</span>
+          </div>
+          <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('scores', {}, 'Обновляю онлайн-счёт...')">
+            ⚽ Обновить счёт сейчас
+          </button>
+        </div>
+      `;
+      const cards = matches.map(m => {
         const cleanTitle = (m.match || '').replace(/^\d+\.\s*\[[ABC]\]\s*[⚽🏒]\s*/, '');
         const hasShift = /СДВИГ|ПРОГРУЗ|РОСТ|⚖️/i.test(m.lineMove || '');
         const shiftHtml = hasShift
           ? `<span class="chip shift">${escapeHtml((m.lineMove || '').split(' | ')[0])}</span>`
           : '';
         const scoreText = m.score ? `⚽ Счёт: ${m.score}` : '⚽ Счёт: —';
+        let badgeClass = 'pick-badge';
+        let pickLabel = m.finalPick || '—';
+        if (m.hit === true) {
+          badgeClass += ' hit';
+          pickLabel = `${pickLabel} ✅`;
+        } else if (m.hit === false) {
+          badgeClass += ' miss';
+          pickLabel = `${pickLabel} ❌`;
+        }
         return `
           <article class="match-card">
             <div class="match-top">
               <div class="match-name">${m.num}. ${escapeHtml(cleanTitle)}</div>
-              <div class="pick-badge">${escapeHtml(m.finalPick || '—')}</div>
+              <div class="${badgeClass}">${escapeHtml(pickLabel)}</div>
             </div>
             <div class="match-meta">
               <span class="chip score">${escapeHtml(scoreText)}</span>
@@ -644,6 +766,7 @@
           </article>
         `;
       }).join('');
+      container.innerHTML = headerCard + cards;
     }
 
     function renderCoupons(st) {
@@ -654,6 +777,31 @@
       document.getElementById('couponList').textContent = coupons.length
         ? coupons.join('\n')
         : 'На листе «🎫 Ставка_Балтбет» пока нет собранных купонов.';
+    }
+
+    function renderArchive(arch) {
+      const container = document.getElementById('tab-archive');
+      const items = arch && arch.items ? arch.items : [];
+      if (!items.length) {
+        container.innerHTML = '<div class="card">Архив тиражей пока пуст.</div>';
+        return;
+      }
+      container.inner = '';
+      container.innerHTML = items.map(it => {
+        const profStr = it.profit >= 0 ? `+${it.profit} ₽` : `${it.profit} ₽`;
+        return `
+          <div class="arch-item">
+            <div class="arch-head">
+              <span>${escapeHtml(it.draw)}</span>
+              <span>ИТОГ: ${it.finalHits}/${it.played || 15}</span>
+            </div>
+            <div class="info-line" style="margin-top:2px">
+              Математика: <strong>${it.mathHits}</strong> · Лидер: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
+            </div>
+            ${it.notes ? `<div class="info-line">${escapeHtml(it.notes)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
     }
 
     async function copyCoupons() {
