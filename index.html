@@ -204,6 +204,14 @@
       border-color: var(--accent);
     }
 
+    .d-btn.pack-btn {
+      width: 100%;
+      margin-top: 8px;
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
     .d-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -227,6 +235,7 @@
       display: flex;
       flex-direction: column;
       gap: 7px;
+      margin-bottom: 10px;
     }
 
     .match-top {
@@ -265,6 +274,12 @@
       background: var(--surface-2);
       border-radius: 7px;
       padding: 2px 7px;
+    }
+
+    .chip.score {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .chip.shift {
@@ -415,7 +430,7 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Управление двойниками</span>
+          <span class="card-title">Управление двойниками и пакетом</span>
           <span class="pill" id="dCurrentBadge">Дв: —</span>
         </div>
         <div class="doubles-row">
@@ -423,6 +438,9 @@
           <button class="d-btn" id="btnD10" onclick="setDoubles(10)">Дв: 10</button>
           <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Дв: 11</button>
         </div>
+        <button class="d-btn pack-btn" id="btnPack44" onclick="buildPack44()">
+          💎 Пакет 1320 ₽ (44 купона × 30 ₽)
+        </button>
         <div class="info-line" id="packetSummary">
           Пакет: <strong>—</strong>
         </div>
@@ -452,7 +470,7 @@
     </button>
     <button class="nav-btn" id="nav-matches" onclick="switchTab('matches')">
       <span>📋</span>
-      <span>Матчи (1–15)</span>
+      <span>Матчи и Счёт</span>
     </button>
     <button class="nav-btn" id="nav-coupons" onclick="switchTab('coupons')">
       <span>🎫</span>
@@ -564,6 +582,14 @@
       showToast(`Установлено двойников: ${count}`);
     }
 
+    async function buildPack44() {
+      if (isBusy) return;
+      showToast('Формирую пакет 1320 ₽ (44 куп.)...');
+      const sep = API_URL.includes('?') ? '&' : '?';
+      await loadState(`${API_URL}${sep}action=pack44`);
+      showToast('Готово: 44 купона = 1320 ₽');
+    }
+
     function renderAll(st) {
       document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'}`;
       document.getElementById('drawBadge').textContent = st.draw || 'Тираж';
@@ -583,7 +609,7 @@
 
       const bs = st.betSummary || {};
       document.getElementById('packetSummary').innerHTML =
-        `Стратегия: <strong>${bs.strategy || '—'}</strong> · Купонов: <strong>${bs.count || 0}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
+        `Стратегия: <strong>${escapeHtml(bs.strategy || '—')}</strong> · Купонов: <strong>${bs.count || 0}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
 
       renderMatches(st.matches || []);
       renderCoupons(st);
@@ -601,7 +627,7 @@
         const shiftHtml = hasShift
           ? `<span class="chip shift">${escapeHtml((m.lineMove || '').split(' | ')[0])}</span>`
           : '';
-        const scoreHtml = m.score ? `<span class="chip">Счёт: ${escapeHtml(m.score)}</span>` : '';
+        const scoreText = m.score ? `⚽ Счёт: ${m.score}` : '⚽ Счёт: —';
         return `
           <article class="match-card">
             <div class="match-top">
@@ -609,9 +635,9 @@
               <div class="pick-badge">${escapeHtml(m.finalPick || '—')}</div>
             </div>
             <div class="match-meta">
+              <span class="chip score">${escapeHtml(scoreText)}</span>
               ${m.leagueTime ? `<span class="chip">${escapeHtml(m.leagueTime)}</span>` : ''}
               ${m.odds ? `<span class="chip">Кэфы: ${escapeHtml(m.odds)}</span>` : ''}
-              ${scoreHtml}
               ${shiftHtml}
             </div>
             ${m.claude ? `<div class="match-claude">${escapeHtml(m.claude)}</div>` : ''}
