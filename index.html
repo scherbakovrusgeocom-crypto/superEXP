@@ -467,12 +467,10 @@
       tg.expand();
     }
 
-    const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyeXU8XrB3R5YTDw5DmOn22sMACoM0vOIzUicB2Z0eOquJmh_NSTWC6JLiuPf3xFXta/exec';
+    const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbxXji1xKkI_P6NbMLyQLiW50HvMS3Jje-J9h7AgL9l03uKNBtBVq4aJU_RzBBRqKh1g/exec';
     const params = new URLSearchParams(window.location.search);
-    const API_URL = (params.get('api') || localStorage.getItem('TOTO_PRO_API_URL') || DEFAULT_API_URL).trim();
-    if (params.get('api')) {
-      localStorage.setItem('TOTO_PRO_API_URL', API_URL);
-    }
+    const API_URL = (params.get('api') || DEFAULT_API_URL).trim();
+    localStorage.setItem('TOTO_PRO_API_URL', API_URL);
 
     let currentState = null;
     let isBusy = false;
