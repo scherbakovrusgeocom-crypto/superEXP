@@ -222,12 +222,6 @@
       cursor: not-allowed;
     }
 
-    .draw-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
     .draw-inp, .draw-ta {
       width: 100%;
       background: var(--surface-2);
@@ -241,7 +235,7 @@
 
     .draw-ta {
       margin-top: 8px;
-      min-height: 110px;
+      min-height: 105px;
       resize: vertical;
     }
 
@@ -469,12 +463,12 @@
     <section id="tab-dashboard" class="hidden">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Состояние и заход прогнозов</span>
+          <span class="card-title">Угадано и состояние тиража</span>
           <span class="pill ok" id="drawBadge">Тираж</span>
         </div>
         <div class="grid-2">
           <div class="metric">
-            <div class="metric-label">Зашло (сыграно / из 15)</div>
+            <div class="metric-label">Угадано (сыграно / из 15)</div>
             <div class="metric-val" id="mHits">—</div>
           </div>
           <div class="metric">
@@ -496,22 +490,22 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Загрузка тиража текстом (с автосохранением)</span>
+          <span class="card-title">Мои ставки в таблице и текст тиража</span>
         </div>
-        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую ставки в архиве...')">
-          💾 Зафиксировать текущие ставки в архив
+        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Записываю мои ставки в таблицу...')">
+          💾 Зафиксировать мои ставки в таблицу
         </button>
-        <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер/название тиража (например: №5077)" />
-        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте сюда текст тиража с телефона (по матчу на строку, например:&#10;1. Арсенал - Челси 1.85 / 3.50 / 4.20&#10;2. Интер - Милан)"></textarea>
+        <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер тиража (например: №5077)" />
+        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте текст тиража с телефона (по матчу на строку)"></textarea>
         <button class="icon-btn primary" style="width:100%; justify-content:center; margin-top:8px" onclick="importDrawFromTextarea()">
-          📋 Загрузить текст тиража (старые ставки в архив)
+          📋 Загрузить текст тиража (старые ставки в таблицу)
         </button>
         <div class="btn-grid-2">
           <button class="d-btn" onclick="triggerAction('step2', {}, 'Запускаю Шаг 2 OSINT...')">🌐 Шаг 2 OSINT</button>
           <button class="d-btn" onclick="triggerAction('step3', {}, 'Запускаю Шаг 3 Claude...')">🤖 Шаг 3 Claude</button>
         </div>
-        <button class="d-btn pack-btn" onclick="triggerAction('scores', {}, 'Обновляю онлайн-счёт...')">
-          ⚽ Обновить онлайн-счёт и заход
+        <button class="d-btn pack-btn" onclick="triggerAction('scores', {}, 'Обновляю счёт и подсчёт угаданных...')">
+          ⚽ Обновить счёт и подсчёт угаданных
         </button>
       </div>
 
@@ -547,7 +541,7 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 4: АРХИВ -->
+    <!-- ВКЛАДКА 4: МОИ СТАВКИ И АРХИВ -->
     <section id="tab-archive" class="hidden"></section>
   </main>
 
@@ -566,7 +560,7 @@
     </button>
     <button class="nav-btn" id="nav-archive" onclick="switchTab('archive')">
       <span>🗄️</span>
-      <span>Архив</span>
+      <span>Мои ставки</span>
     </button>
   </nav>
 
@@ -628,7 +622,7 @@
 
         script.onerror = function() {
           cleanup();
-          reject(new Error('Ошибка загрузки скрипта API'));
+          reject(new Error('Ошибка загрузки API (проверьте доступ «Все» в развёртывании)'));
         };
 
         script.src = `${url}${sep}callback=${encodeURIComponent(cbName)}&_t=${Date.now()}`;
@@ -639,10 +633,10 @@
     async function requestApi(url) {
       const sep = url.includes('?') ? '&' : '?';
       try {
+        return await loadViaJsonp(url, 25000);
+      } catch (jsonpErr) {
         const res = await fetch(`${url}${sep}_t=${Date.now()}`, { cache: 'no-store' });
         return await res.json();
-      } catch (e1) {
-        return await loadViaJsonp(url, 25000);
       }
     }
 
@@ -661,7 +655,7 @@
           switchTab('dashboard');
         }
       } catch (err) {
-        showToast('Ошибка загрузки: ' + (err.message || err));
+        showToast('Ошибка: ' + (err.message || err));
         document.getElementById('topSub').textContent = 'Ошибка соединения с API';
       } finally {
         setButtonsDisabled(false);
@@ -684,7 +678,7 @@
         showToast('Вставьте текст тиража перед загрузкой');
         return;
       }
-      await triggerAction('import_text', { text: rawText.trim(), draw: drawTitle.trim() }, 'Сохраняю старые ставки и загружаю тираж...');
+      await triggerAction('import_text', { text: rawText.trim(), draw: drawTitle.trim() }, 'Сохраняю ставки и загружаю тираж...');
     }
 
     async function setDoubles(count) {
@@ -693,7 +687,7 @@
 
     function renderAll(st) {
       const ls = st.liveScoreStats || { hits: 0, played: 0, total: 15 };
-      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'} · Зашло: ${ls.hits}/${ls.played}`;
+      document.getElementById('topSub').textContent = `Обновлено: ${st.updatedAt || '—'} · Угадано: ${ls.hits}/${ls.played}`;
       document.getElementById('drawBadge').textContent = st.draw || 'Тираж';
       document.getElementById('mHits').textContent = `${ls.hits} / ${ls.played} (${ls.hits}/15)`;
       document.getElementById('mDeadline').textContent = st.deadline || '—';
@@ -727,11 +721,11 @@
       const headerCard = `
         <div class="card">
           <div class="card-head">
-            <span class="card-title">Онлайн-счёт и заход</span>
-            <span class="pill ok">Зашло: ${ls.hits}/${ls.played} (из 15)</span>
+            <span class="card-title">Счёт и подсчёт угаданных</span>
+            <span class="pill ok">Угадано: ${ls.hits}/${ls.played} (из 15)</span>
           </div>
-          <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('scores', {}, 'Обновляю онлайн-счёт...')">
-            ⚽ Обновить счёт сейчас
+          <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('scores', {}, 'Обновляю счёт и подсчёт...')">
+            ⚽ Обновить счёт и подсчёт угаданных
           </button>
         </div>
       `;
@@ -786,7 +780,7 @@
       const items = (arch && arch.items) ? arch.items : [];
 
       if (!snaps.length && !items.length) {
-        container.innerHTML = '<div class="card">Архив тиражей пока пуст.</div>';
+        container.innerHTML = '<div class="card">Зафиксированных ставок и записей архива пока нет.</div>';
         return;
       }
 
@@ -798,11 +792,11 @@
         return `
           <div class="arch-item">
             <div class="arch-head">
-              <span>📌 ${escapeHtml(s.draw)} (${escapeHtml(s.reason || 'Снапшот')})</span>
-              <span>Зашло: ${s.hits}/${s.played || 15}</span>
+              <span>📌 ${escapeHtml(s.draw)} (${escapeHtml(s.reason || 'Фиксация')})</span>
+              <span>Угадано: ${s.hits}/${s.played || 15}</span>
             </div>
             <div class="info-line" style="margin-top:2px">
-              Сохранено: <strong>${escapeHtml(s.savedAt)}</strong> · Купонов: <strong>${s.couponsCount}</strong> · Сумма: <strong>${s.totalRub} ₽</strong>
+              Записано в таблицу: <strong>${escapeHtml(s.savedAt)}</strong> · Купонов: <strong>${s.couponsCount}</strong> · Сумма: <strong>${s.totalRub} ₽</strong>
             </div>
             <div class="arch-picks">${escapeHtml(lines)}</div>
           </div>
@@ -815,10 +809,10 @@
           <div class="arch-item">
             <div class="arch-head">
               <span>${escapeHtml(it.draw)}</span>
-              <span>ИТОГ: ${it.finalHits}/${it.played || 15}</span>
+              <span>Угадано: ${it.finalHits}/${it.played || 15}</span>
             </div>
             <div class="info-line" style="margin-top:2px">
-              Математика: <strong>${it.mathHits}</strong> · Стратегия/Лидер: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
+              Математика: <strong>${it.mathHits}</strong> · Стратегия: <strong>${escapeHtml(it.leader || '—')}</strong> · Профит: <strong>${escapeHtml(profStr)}</strong>
             </div>
             ${it.notes ? `<div class="info-line">${escapeHtml(it.notes)}</div>` : ''}
           </div>
@@ -826,8 +820,8 @@
       }).join('');
 
       container.innerHTML =
-        `<div class="card"><div class="card-head"><span class="card-title">Сохранённые ставки и купоны</span></div>${snapHtml || '<div class="info-line">Снапшотов пока нет.</div>'}</div>` +
-        `<div class="card"><div class="card-head"><span class="card-title">Журнал листа «Архив»</span></div>${rowsHtml}</div>`;
+        `<div class="card"><div class="card-head"><span class="card-title">Мои ставки (лист «📌 Мои_Ставки»)</span></div>${snapHtml || '<div class="info-line">Снапшотов пока нет.</div>'}</div>` +
+        `<div class="card"><div class="card-head"><span class="card-title">Лист «Архив»</span></div>${rowsHtml}</div>`;
     }
 
     async function copyCoupons() {
