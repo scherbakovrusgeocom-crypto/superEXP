@@ -235,7 +235,7 @@
 
     .draw-ta {
       margin-top: 8px;
-      min-height: 105px;
+      min-height: 110px;
       resize: vertical;
     }
 
@@ -490,15 +490,15 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Мои ставки в таблице и текст тиража</span>
+          <span class="card-title">Загрузка тиража текстом (прошлый сохраняется сам)</span>
         </div>
-        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Записываю мои ставки в таблицу...')">
-          💾 Зафиксировать мои ставки в таблицу
+        <button class="d-btn pack-btn" style="margin-top:0" onclick="triggerAction('save_snap', {}, 'Фиксирую ставки в таблицу...')">
+          💾 Зафиксировать текущие ставки в таблицу
         </button>
         <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер тиража (например: №5077)" />
-        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте текст тиража с телефона (по матчу на строку)"></textarea>
+        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте скопированный текст тиража с телефона (данные прошлого тиража сохранятся автоматически)"></textarea>
         <button class="icon-btn primary" style="width:100%; justify-content:center; margin-top:8px" onclick="importDrawFromTextarea()">
-          📋 Загрузить текст тиража (старые ставки в таблицу)
+          📋 Загрузить текст тиража (прошлый тираж в архив)
         </button>
         <div class="btn-grid-2">
           <button class="d-btn" onclick="triggerAction('step2', {}, 'Запускаю Шаг 2 OSINT...')">🌐 Шаг 2 OSINT</button>
@@ -574,7 +574,6 @@
     const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbxXji1xKkI_P6NbMLyQLiW50HvMS3Jje-J9h7AgL9l03uKNBtBVq4aJU_RzBBRqKh1g/exec';
     const params = new URLSearchParams(window.location.search);
     const API_URL = (params.get('api') || DEFAULT_API_URL).trim();
-    localStorage.setItem('TOTO_PRO_API_URL', API_URL);
 
     let currentState = null;
     let isBusy = false;
@@ -678,7 +677,7 @@
         showToast('Вставьте текст тиража перед загрузкой');
         return;
       }
-      await triggerAction('import_text', { text: rawText.trim(), draw: drawTitle.trim() }, 'Сохраняю ставки и загружаю тираж...');
+      await triggerAction('import_text', { text: rawText.trim(), draw: drawTitle.trim() }, 'Сохраняю прошлый тираж и загружаю новый...');
     }
 
     async function setDoubles(count) {
