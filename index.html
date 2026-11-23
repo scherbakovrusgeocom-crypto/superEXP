@@ -525,7 +525,6 @@
   <main class="container">
     <div id="loader" class="loader">Загружаю данные тиража...</div>
 
-    <!-- ВКЛАДКА 1: ПУЛЬТ -->
     <section id="tab-dashboard" class="hidden">
       <div class="card">
         <div class="card-head">
@@ -562,7 +561,7 @@
           💾 Зафиксировать ставки тиража в архив
         </button>
         <input type="text" class="draw-inp" id="drawTitleInput" style="margin-top:8px" placeholder="Номер тиража (например: №5078)" />
-        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте скопированный текст тиража с телефона (шапки таблицы отфильтруются сами, прошлый тираж сохранится в архив)"></textarea>
+        <textarea class="draw-ta" id="drawTextInput" placeholder="Вставьте скопированный текст тиража с телефона (шапки отфильтруются сами, прошлый тираж сохранится в архив)"></textarea>
         <button class="icon-btn primary" style="width:100%; justify-content:center; margin-top:8px" onclick="importDrawFromTextarea()">
           📋 Загрузить текст тиража (прошлый тираж в архив)
         </button>
@@ -577,13 +576,13 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Страховки (11 / 12 / 13) и купоны от 30 ₽</span>
-          <span class="pill" id="dCurrentBadge">Стр: —</span>
+          <span class="card-title">Бриф-система (11 / 12 / 13) и сумма от 30 ₽</span>
+          <span class="pill" id="dCurrentBadge">Бриф: —</span>
         </div>
         <div class="doubles-row">
-          <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Стр: 11</button>
-          <button class="d-btn" id="btnD12" onclick="setDoubles(12)">Стр: 12</button>
-          <button class="d-btn" id="btnD13" onclick="setDoubles(13)">Стр: 13</button>
+          <button class="d-btn" id="btnD11" onclick="setDoubles(11)">Бриф 11</button>
+          <button class="d-btn" id="btnD12" onclick="setDoubles(12)">Бриф 12</button>
+          <button class="d-btn" id="btnD13" onclick="setDoubles(13)">Бриф 13</button>
         </div>
         <button class="d-btn pack-btn" onclick="triggerAction('pack44', {}, 'Собираю 44 купона × 30 ₽ = 1320 ₽...')">
           💎 Пакет 1320 ₽ (44 купона × 30 ₽)
@@ -592,10 +591,8 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 2: МАТЧИ И СЧЁТ -->
     <section id="tab-matches" class="hidden"></section>
 
-    <!-- ВКЛАДКА 3: КУПОНЫ -->
     <section id="tab-coupons" class="hidden">
       <div class="card">
         <div class="card-head">
@@ -607,7 +604,6 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 4: АРХИВ И ГРАФИК -->
     <section id="tab-archive" class="hidden"></section>
   </main>
 
@@ -698,7 +694,7 @@
 
         script.onerror = function() {
           cleanup();
-          reject(new Error('Блокировка API в WebView Telegram (нажмите 🌐 сверху)'));
+          reject(new Error('WebView заблокировал API — нажмите 🌐 вверху для открытия в браузере'));
         };
 
         script.src = `${url}${sep}callback=${encodeURIComponent(cbName)}&_t=${Date.now()}`;
@@ -765,7 +761,7 @@
     }
 
     async function setDoubles(count) {
-      await triggerAction('set_doubles', { count }, `Устанавливаю ${count} страховок...`);
+      await triggerAction('set_doubles', { count }, `Пересчёт брифа на ${count} страховок...`);
     }
 
     function renderAll(st, isCached) {
@@ -781,18 +777,21 @@
       document.getElementById('mStep3').textContent = st.step3Status || '—';
 
       const dLim = Number(st.doublesLimit || 0);
-      document.getElementById('dCurrentBadge').textContent = `Стр: ${dLim}`;
+      document.getElementById('dCurrentBadge').textContent = `Бриф: ${dLim}`;
       [11, 12, 13].forEach(n => {
         const btn = document.getElementById('btnD' + n);
         if (btn) btn.classList.toggle('active', dLim === n);
       });
 
       const bs = st.betSummary || {};
+      const stake = Math.max(30, Number(bs.stake) || 30);
+      const cCount = Number(bs.count) || 0;
+      const totalRub = cCount * stake;
       document.getElementById('packetSummary').innerHTML =
-        `Стратегия: <strong>${escapeHtml(bs.strategy || '—')}</strong> · Купонов: <strong>${bs.count || 0}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
+        `Стратегия: <strong>${escapeHtml(bs.strategy || '—')}</strong> · Купонов: <strong>${cCount}</strong> × <strong>${stake} ₽</strong> = <strong>${totalRub} ₽</strong>`;
 
       renderMatches(st.matches || [], ls);
-      renderCoupons(st);
+      renderCoupons(st, stake);
       renderArchive(st.archive || { items: [], snapshots: [] });
     }
 
@@ -849,11 +848,11 @@
       container.innerHTML = headerCard + cards;
     }
 
-    function renderCoupons(st) {
+    function renderCoupons(st, stake) {
       const coupons = st.coupons || [];
-      const bs = st.betSummary || {};
+      const totalRub = coupons.length * stake;
       document.getElementById('couponMeta').innerHTML =
-        `Тираж: <strong>${escapeHtml(st.draw || '—')}</strong> · Купонов: <strong>${coupons.length}</strong> · Сумма: <strong>${bs.total || 0} ₽</strong>`;
+        `Тираж: <strong>${escapeHtml(st.draw || '—')}</strong> · Купонов: <strong>${coupons.length}</strong> × <strong>${stake} ₽</strong> = <strong>${totalRub} ₽</strong>`;
       document.getElementById('couponList').textContent = coupons.length
         ? coupons.join('\n')
         : 'На листе «🎫 Ставка_Балтбет» пока нет собранных купонов.';
@@ -876,7 +875,7 @@
           <div class="chart-row">
             <div class="chart-row-head">
               <span>${escapeHtml(s.draw)}</span>
-              <span>Итог: ${s.hits || 0} · Мат: ${s.mathHits || 0} · Claude: ${s.claudeHits || 0}</span>
+              <span>Итог: ${s.hits || 0} · Мат: ${s.mathHits || 0} · AI: ${s.claudeHits || 0}</span>
             </div>
             <div class="bar-group">
               <div class="bar-line"><span class="bar-label">Мои (${s.hits || 0}/15)</span><div class="bar-track"><div class="bar-fill final" style="width:${fPct}%"></div></div></div>
@@ -895,7 +894,7 @@
         return `
           <div class="arch-item">
             <div class="arch-head">
-              <span>📌 ${escapeHtml(s.draw)}</span>
+              <span>🔹 ${escapeHtml(s.draw)}</span>
               <span>Итог: ${s.hits}/${s.played || 15}</span>
             </div>
             <div class="info-line" style="margin-top:2px">
@@ -907,7 +906,7 @@
       }).join('');
 
       container.innerHTML =
-        `<div class="card"><div class="card-head"><span class="card-title">График точности (Мат vs Claude vs Мои)</span></div><div class="chart-box">${chartRows}</div></div>` +
+        `<div class="card"><div class="card-head"><span class="card-title">График точности (Мат vs AI vs Мои)</span></div><div class="chart-box">${chartRows}</div></div>` +
         `<div class="card"><div class="card-head"><span class="card-title">Уникальные тиражи (1 тираж = 1 запись)</span></div>${snapHtml}</div>`;
     }
 
@@ -939,7 +938,6 @@
         .replace(/"/g, '&quot;');
     }
 
-    // Сначала мгновенно показываем последний кэш, затем обновляем с сервера
     try {
       const cachedRaw = localStorage.getItem(CACHE_KEY);
       if (cachedRaw) {
